@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Tech Dashboard - VueJS</title>
+
+  <!-- Vue Development (ganti ke .prod.js saat production) -->
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+
+  <!-- Axios untuk komunikasi API -->
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+
+  <!-- Font Awesome untuk ikon -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <!-- Style -->
+  <link rel="stylesheet" href="assets/css/style.css" />
+
+  <!-- Hindari error favicon -->
+  <link rel="icon" href="data:,">
+</head>
+<body>
+  <div id="app">
+    <div class="header-section">
+      <h1><i class="fas fa-microchip"></i> Tech Dashboard</h1>
+      <p class="subtitle">Manage your digital content with modern technology</p>
+    </div>
+    
+    <button id="btn-tambah" @click="tambah">
+      <i class="fas fa-plus"></i> Add New Article
+    </button>
+
+    <!-- Modal -->
+    <div class="modal" v-if="showForm">
+      <div class="modal-content">
+        <span class="close" @click="closeModal">
+          <i class="fas fa-times"></i>
+        </span>
+        <form @submit.prevent="saveData" enctype="multipart/form-data">
+          <h3><i class="fas fa-edit"></i> {{ formTitle }}</h3>
+          <div><input type="text" v-model="formData.judul" placeholder="Article Title" required /></div>
+          <div><textarea v-model="formData.isi" rows="6" placeholder="Article Content" required></textarea></div>
+
+          <!-- Upload Gambar -->
+          <div class="form-group">
+            <label for="gambar"><i class="fas fa-image"></i> Article Image:</label>
+            <input type="file" id="gambar" ref="fileInput" @change="handleFileUpload" accept="image/*" />
+            <small class="file-info">Format: JPG, PNG, GIF. Max 2MB</small>
+          </div>
+
+          <!-- Preview Gambar -->
+          <div v-if="imagePreview" class="image-preview">
+            <img :src="imagePreview" alt="Preview" />
+            <button type="button" @click="removeImage" class="remove-image">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+
+          <!-- Gambar Existing (saat edit) -->
+          <div v-if="formData.gambar && !imagePreview" class="existing-image">
+            <label><i class="fas fa-image"></i> Current Image:</label>
+            <img :src="'http://localhost/ci4/public/gambar/' + formData.gambar" alt="Current Image" />
+            <button type="button" @click="removeExistingImage" class="remove-image">
+              <i class="fas fa-trash"></i> Remove Image
+            </button>
+          </div>
+
+          <div>
+            <select v-model="formData.status">
+              <option v-for="option in statusOptions" :value="option.value">{{ option.text }}</option>
+            </select>
+          </div>
+          <input type="hidden" v-model="formData.id" />
+          <button id="btnSimpan" type="submit" :disabled="isUploading">
+            <i class="fas fa-save"></i> {{ isUploading ? 'Saving...' : 'Save' }}
+          </button>
+          <button type="button" @click="closeModal">
+            <i class="fas fa-times"></i> Cancel
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Tabel Artikel dengan Scroll -->
+    <div class="table-container">
+      <div class="table-header">
+        <h3><i class="fas fa-list"></i> Article List</h3>
+        <div class="table-stats">
+          <span class="stat-item">
+            <i class="fas fa-file-alt"></i> {{ artikel.length }} Articles
+          </span>
+        </div>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th><i class="fas fa-hashtag"></i> ID</th>
+            <th><i class="fas fa-image"></i> Image</th>
+            <th><i class="fas fa-heading"></i> Title</th>
+            <th><i class="fas fa-toggle-on"></i> Status</th>
+            <th><i class="fas fa-cogs"></i> Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="(row, index) in artikel" :key="row.id">
+            <td class="center-text">{{ row.id }}</td>
+            <td class="center-text">
+              <img v-if="row.gambar"
+                   :src="'http://localhost/ci4/public/gambar/' + row.gambar"
+                   alt="Gambar Artikel"
+                   class="table-image" />
+              <span v-else class="no-image">
+                <i class="fas fa-image"></i> No Image
+              </span>
+            </td>
+            <td>{{ row.judul }}</td>
+            <td>
+              <span class="status-badge" :class="'status-' + row.status">
+                <i class="fas" :class="row.status === '1' ? 'fa-check-circle' : 'fa-times-circle'"></i>
+                {{ statusText(row.status) }}
+              </span>
+            </td>
+            <td class="center-text">
+              <a href="#" @click.prevent="edit(row)" class="action-btn edit-btn">
+                <i class="fas fa-edit"></i> Edit
+              </a>
+              <a href="#" @click.prevent="hapus(index, row.id)" class="action-btn delete-btn">
+                <i class="fas fa-trash"></i> Delete
+              </a>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Connection Status -->
+  <script>
+    console.log('🚀 Vue.js + CodeIgniter App Loading...')
+    console.log('📍 Current URL:', window.location.href)
+    console.log('🔧 If you have connection issues, open: startup-check.html')
+  </script>
+
+  <!-- Hubungkan dengan Vue App -->
+  <script src="assets/js/app.js"></script>
+</body>
+</html>
